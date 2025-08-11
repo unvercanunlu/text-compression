@@ -6,7 +6,7 @@ import tr.unvercanunlu.text_compression.util.ValidationUtil;
 
 public class AsciiRleTextCompressor implements Compressor<String, String> {
 
-  private static final String NON_ASCII_ERROR_MESSAGE = "Invalid input: expected ASCII letter at position %d: '%s'";
+  private static final String NON_ASCII_LETTER_ERROR_MESSAGE = "Invalid input: expected ASCII letter at position %d: '%c'";
 
   @Override
   public String compress(String input) {
@@ -23,7 +23,7 @@ public class AsciiRleTextCompressor implements Compressor<String, String> {
 
     // validation
     if (!CharacterUtil.isAsciiAlphabetic(first)) {
-      throw new IllegalArgumentException(NON_ASCII_ERROR_MESSAGE.formatted(0, first));
+      throw new IllegalArgumentException(NON_ASCII_LETTER_ERROR_MESSAGE.formatted(0, first));
     }
 
     // length
@@ -47,7 +47,7 @@ public class AsciiRleTextCompressor implements Compressor<String, String> {
 
       // validation
       if (!CharacterUtil.isAsciiAlphabetic(current)) {
-        throw new IllegalArgumentException(NON_ASCII_ERROR_MESSAGE.formatted(i, current));
+        throw new IllegalArgumentException(NON_ASCII_LETTER_ERROR_MESSAGE.formatted(i, current));
       }
 
       // comparison
