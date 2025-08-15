@@ -1,12 +1,14 @@
 package tr.unvercanunlu.text_compression.service.impl;
 
+import static tr.unvercanunlu.text_compression.config.Message.NON_ASCII_LETTER_ERROR_MESSAGE;
+
+import lombok.extern.slf4j.Slf4j;
 import tr.unvercanunlu.text_compression.service.Compressor;
 import tr.unvercanunlu.text_compression.util.CharacterUtil;
 import tr.unvercanunlu.text_compression.util.ValidationUtil;
 
+@Slf4j
 public class AsciiRleTextCompressor implements Compressor<String, String> {
-
-  private static final String NON_ASCII_LETTER_ERROR_MESSAGE = "Invalid input: expected ASCII letter at position %d: '%c'";
 
   @Override
   public String compress(String input) {
@@ -23,7 +25,9 @@ public class AsciiRleTextCompressor implements Compressor<String, String> {
 
     // validation
     if (!CharacterUtil.isAsciiAlphabetic(first)) {
-      throw new IllegalArgumentException(NON_ASCII_LETTER_ERROR_MESSAGE.formatted(0, first));
+      String message = NON_ASCII_LETTER_ERROR_MESSAGE.formatted(0, first);
+      log.error(message);
+      throw new IllegalArgumentException(message);
     }
 
     // length
@@ -47,7 +51,9 @@ public class AsciiRleTextCompressor implements Compressor<String, String> {
 
       // validation
       if (!CharacterUtil.isAsciiAlphabetic(current)) {
-        throw new IllegalArgumentException(NON_ASCII_LETTER_ERROR_MESSAGE.formatted(i, current));
+        String message = NON_ASCII_LETTER_ERROR_MESSAGE.formatted(i, current);
+        log.error(message);
+        throw new IllegalArgumentException(message);
       }
 
       // comparison
@@ -68,7 +74,11 @@ public class AsciiRleTextCompressor implements Compressor<String, String> {
     appendGroup(builder, previous, count);
 
     // finalize
-    return builder.toString();
+    String output = builder.toString();
+
+    log.debug("Text compressed: input=%s output=%s".formatted(input, output));
+
+    return output;
   }
 
   private static void appendGroup(StringBuilder builder, char character, int count) {

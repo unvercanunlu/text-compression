@@ -1,14 +1,16 @@
 package tr.unvercanunlu.text_compression.service.impl;
 
+import static tr.unvercanunlu.text_compression.config.Message.NON_ASCII_CHARACTER_ERROR_MESSAGE;
+import static tr.unvercanunlu.text_compression.config.Message.NON_ASCII_DIGIT_ERROR_MESSAGE;
+import static tr.unvercanunlu.text_compression.config.Message.NON_ASCII_LETTER_ERROR_MESSAGE;
+
+import lombok.extern.slf4j.Slf4j;
 import tr.unvercanunlu.text_compression.service.Decompressor;
 import tr.unvercanunlu.text_compression.util.CharacterUtil;
 import tr.unvercanunlu.text_compression.util.ValidationUtil;
 
+@Slf4j
 public class AsciiRleTextDecompressor implements Decompressor<String, String> {
-
-  private static final String NON_ASCII_LETTER_ERROR_MESSAGE = "Invalid input: expected ASCII letter at position %d: '%c'";
-  private static final String NON_ASCII_DIGIT_ERROR_MESSAGE = "Invalid input: expected ASCII digit at position %d but got '%c'";
-  private static final String NON_ASCII_CHARACTER_ERROR_MESSAGE = "Invalid input: expected ASCII letter or digit at position %d but got '%c'";
 
   @Override
   public String decompress(String input) {
@@ -25,7 +27,9 @@ public class AsciiRleTextDecompressor implements Decompressor<String, String> {
 
     // validation
     if (!CharacterUtil.isAsciiAlphabetic(first)) {
-      throw new IllegalArgumentException(NON_ASCII_LETTER_ERROR_MESSAGE.formatted(0, first));
+      String message = NON_ASCII_LETTER_ERROR_MESSAGE.formatted(0, first);
+      log.error(message);
+      throw new IllegalArgumentException(message);
     }
 
     if (input.length() == 1) {
@@ -61,7 +65,9 @@ public class AsciiRleTextDecompressor implements Decompressor<String, String> {
 
         // validation for leading zero case
         if (isPreviousAlphabetic && converted == 0) {
-          throw new IllegalArgumentException(NON_ASCII_DIGIT_ERROR_MESSAGE.formatted(i, current));
+          String message = NON_ASCII_DIGIT_ERROR_MESSAGE.formatted(i, current);
+          log.error(message);
+          throw new IllegalArgumentException(message);
         }
 
         if (isPreviousAlphabetic) {
@@ -75,7 +81,9 @@ public class AsciiRleTextDecompressor implements Decompressor<String, String> {
       }
       // validation
       else {
-        throw new IllegalArgumentException(NON_ASCII_CHARACTER_ERROR_MESSAGE.formatted(i, current));
+        String message = NON_ASCII_CHARACTER_ERROR_MESSAGE.formatted(i, current);
+        log.error(message);
+        throw new IllegalArgumentException(message);
       }
     }
 
@@ -83,7 +91,11 @@ public class AsciiRleTextDecompressor implements Decompressor<String, String> {
     appendGroup(builder, previous, count);
 
     // finalize
-    return builder.toString();
+    String output = builder.toString();
+
+    log.debug("Text decompressed: input=%s output=%s".formatted(input, output));
+
+    return output;
   }
 
   private static void appendGroup(StringBuilder builder, char last, int count) {
